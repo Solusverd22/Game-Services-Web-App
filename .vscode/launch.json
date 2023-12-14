@@ -1,0 +1,52 @@
+{
+	// Use IntelliSense to learn about possible attributes.
+	// Hover to view descriptions of existing attributes.
+	// For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+	"version": "0.2.0",
+	"configurations": [
+		// modified to work - removed "reAttach" and modified other properties to other similar configs w/ port:4200 and client folder
+		{
+			"name": "Launch Firefox",
+			"type": "firefox",
+			"request": "launch",
+			"url": "https://localhost/:8000",
+			"port": 8000,
+			"webRoot": "${workspaceFolder}/index.js"
+		},
+		{
+			"type": "node",
+			"request": "launch",
+			"name": "Launch Node.js",
+			"skipFiles": ["<node_internals>/**"],
+			"program": "${workspaceFolder}\\index.js"
+		},
+		
+		{
+			"name": "Launch index.html",
+			"type": "firefox",
+			"request": "launch",
+			"reAttach": true,
+			"file": "${workspaceFolder}/index.html"
+		},
+		{
+			"name": "Launch localhost",
+			"type": "firefox",
+			"request": "launch",
+			"reAttach": true,
+			"url": "http://localhost/index.html",
+			"webRoot": "${workspaceFolder}"
+		},
+		{
+			"name": "Attach",
+			"type": "firefox",
+			"request": "attach"
+		},
+		{
+			"name": "Launch WebExtension",
+			"type": "firefox",
+			"request": "launch",
+			"reAttach": true,
+			"addonPath": "${workspaceFolder}"
+		}
+	]
+}

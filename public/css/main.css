@@ -7,8 +7,19 @@ body{
 	color: #eeeeee;
 	display: grid;
 	justify-items: center;
+	text-align: center;
 }
 
 a{
 	color: #ff6cdf;
 }
+input{
+	display: flex;
+}
+#footer {
+	position: fixed;
+	left: 5%;
+	bottom: 0;
+	width: 100%;
+	text-align: left;
+  }

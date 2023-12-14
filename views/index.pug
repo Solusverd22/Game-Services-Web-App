@@ -1,6 +1,9 @@
-doctype html 
-html(lang="en")
-title #{siteName}
-link(rel="stylesheet", href="css/main.css")
-h1 #{siteName}
-p hello world
+extends layout.pug
+block content
+	h1 #{siteName}
+	p 
+		| Please 
+		a(href="/login") Log In
+		|  or 
+		a(href="/register") Register
+		|  a new account to access the site
