@@ -10,5 +10,5 @@ CREATE TABLE game_genres (game_id INT, genre_id INT, FOREIGN KEY (genre_id) REFE
 
 INSERT INTO users (name, email)VALUES('conor', 'conor@proton.com'),('beth', 'beth@hotmail.net'), ('kezza', 'kezza@gmail.com');
 
-CREATE USER 'appuser'@'localhost' IDENTIFIED WITH mysql_native_password BY 'app2027';
-GRANT ALL PRIVILEGES ON myBookshop.* TO 'appuser'@'localhost';
+CREATE USER 'gsappuser'@'localhost' IDENTIFIED WITH mysql_native_password BY 'eggg';
+GRANT ALL PRIVILEGES ON gameServices.* TO 'gsappuser'@'localhost';
