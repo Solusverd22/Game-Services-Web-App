@@ -28,9 +28,9 @@ db.connect((err) => {
 });
 global.db = db;
 
-// Set up css
+// makes public directory static(easily visible/accesible on server)
 // __dirname gets the current directory
-app.use(express.static(__dirname + '/public/css'));
+app.use(express.static(__dirname + '/public'));
 
 // Create input sanitizer
 app.use(expressSanitizer());
