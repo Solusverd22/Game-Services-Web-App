@@ -2,4 +2,13 @@
 
 body{
 	font-family: 'Rethink Sans', sans-serif;
+	font-size: xx-large;
+	background-color: #1f1f1f;
+	color: #eeeeee;
+	display: grid;
+	justify-items: center;
+}
+
+a{
+	color: #ff6cdf;
 }
