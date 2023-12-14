@@ -8,7 +8,5 @@ CREATE TABLE game_profiles (id INT AUTO_INCREMENT, user_id INT, game_id INT, pre
 CREATE TABLE genres (id INT AUTO_INCREMENT, name VARCHAR(50), PRIMARY KEY(id));
 CREATE TABLE game_genres (game_id INT, genre_id INT, FOREIGN KEY (genre_id) REFERENCES genres(id), FOREIGN KEY (game_id) REFERENCES games(id));
 
-INSERT INTO users (name, email)VALUES('conor', 'conor@proton.com'),('beth', 'beth@hotmail.net'), ('kezza', 'kezza@gmail.com');
-
-CREATE USER 'gsappuser'@'localhost' IDENTIFIED WITH mysql_native_password BY 'eggg';
-GRANT ALL PRIVILEGES ON gameServices.* TO 'gsappuser'@'localhost';
+CREATE USER 'cgard008'@'localhost' IDENTIFIED WITH mysql_native_password BY 'eggg';
+GRANT ALL PRIVILEGES ON gameServices.* TO 'cgard008'@'localhost';
