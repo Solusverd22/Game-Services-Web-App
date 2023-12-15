@@ -6,8 +6,12 @@ body{
 	background-color: #1f1f1f;
 	color: #eeeeee;
 	display: grid;
+	grid-template-columns: auto auto auto;
 	justify-items: center;
 	text-align: center;
+}
+#grid-item{
+	grid-column-start: 2;
 }
 
 a{
@@ -17,9 +21,20 @@ input{
 	display: flex;
 }
 #footer {
+	display: grid;
+	grid-template-columns: auto auto auto;
 	position: fixed;
 	left: 5%;
 	bottom: 0;
-	width: 100%;
+	width: 90%;
+	/* z-index:-1; */
 	text-align: left;
-  }
+}
+#right-align {
+	grid-column-start: 3;
+	text-align: right;
+	color: #6cffae;
+}
+li{
+	text-align: left;
+}

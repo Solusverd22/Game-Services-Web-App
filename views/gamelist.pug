@@ -1,7 +1,13 @@
 extends layout.pug
 block content
-	h1 Games in our Database:
-	a(href='/addgame') add a new game
+	h1 Games that you own:
 	ul
-	each game in list
-		li= game.title
+		each game in owned
+			li= game.title
+	a(href='/addgame') add a new game
+	h2 Unowned games:
+	ul
+		each game in unowned
+			li= game.title+"-"
+				a(href="/registergame?="+game.id) I have this game
+	
