@@ -2,19 +2,19 @@ module.exports = function (app, siteData) {
 	const { check, validationResult } = require('express-validator');
 	const redirectLogin = (req, res, next) => {
 		if (!req.session.userId) {
-			res.redirect('./login')
+			res.redirect('./login');
 		} else { next(); }
 	}
 
 	// Handle our routes
 	app.get('/', function (req, res) {
-		res.render('index.pug', siteData)
+		res.render('index.pug', siteData);
 	});
 
 	app.get('/register', function (req, res) {
 		res.render('register.pug', siteData);
 	});
-	app.post('/registered', [check('email').isEmail(), check('password').isLength({ min: 8 })], function (req, res) {
+	app.post('/registered', [check('email').isEmail(), check('password').isLength({min: 8})], function (req, res) {
 		const errors = validationResult(req);
 		if (!errors.isEmpty()) {
 			res.redirect('./register');
@@ -36,10 +36,12 @@ module.exports = function (app, siteData) {
 						return console.error(err.message);
 					}
 					else
+						// Save user session here, when login is successful
+						req.session.userId = username;
 						result = 'Hello ' + username + ' you are now registered! We will send an email to you at ' + email;
-					result += 'Your password is: ' + plainPassword + ' and your hashed password is: ' + hashedPassword;
-					let newData = Object.assign({}, siteData, { text: result });
-					res.render('data2text.pug', newData);
+						result += 'Your password is: ' + plainPassword + ' and your hashed password is: ' + hashedPassword;
+						let newData = Object.assign({}, siteData, { text: result });
+						res.render('data2text.pug', newData);
 				});
 			})
 		}
@@ -67,7 +69,7 @@ module.exports = function (app, siteData) {
 			bcrypt.compare(plainPassword, databaseHash[0].passwordhash, function (err, result) {
 				if (err) {
 					let newData = Object.assign({}, siteData, { errorMessage: "Username not found, check your spelling" });
-					res.render("login.pug", newData)
+					res.render("login.pug", newData);
 				}
 				else if (result) {
 					// Save user session here, when login is successful
@@ -77,7 +79,7 @@ module.exports = function (app, siteData) {
 				}
 				else {
 					let newData = Object.assign({}, siteData, { errorMessage: "Wrong password, try again." });
-					res.render("login.pug", newData)
+					res.render("login.pug", newData);
 				}
 			});
 		});
@@ -86,11 +88,29 @@ module.exports = function (app, siteData) {
 	app.get('/logout', (req, res) => {
 		req.session.destroy(err => {
 			if (err) {
-				return res.redirect('./')
+				return res.redirect('./');
 			}
 			let newData = Object.assign({}, siteData, { text: "you are now logged out." });
 			res.render('data2text.pug', newData);
 		})
 	})
 
+	app.get('/about', (req,res) => {
+		res.render('about.pug', siteData);
+	})
+
+	app.get('/gamelist', redirectLogin, (req,res) => {
+		let sqlquery = "SELECT title FROM games ";
+		sqlquery.concat("INNER JOIN game_profiles ON game_profiles.game_id=games.id ");
+		sqlquery.concat("INNER JOIN users ON users.id=game_profiles.user_id ");
+		sqlquery.concat("WHERE username LIKE '"+req.session.userId+"';");
+		// execute sql query
+		db.query(sqlquery, (err, result) => {
+			if (err) {
+				res.redirect('./');
+			}
+			let newData = Object.assign({}, siteData, { list: result });
+			res.render('gamelist',newData);
+		})
+	})
 }
