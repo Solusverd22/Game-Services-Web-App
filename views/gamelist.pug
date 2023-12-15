@@ -1,12 +1,12 @@
 extends layout.pug
 block content
-	h1 Games that you own:
+	a(href='/addgame') add a new game
+	h2 Games that you own:
 	ul
 		each game in owned
 			li= game.title
 				a(href="/deregistergame?keyword="+game.id) I don't have this game
-	a(href='/addgame') add a new game
-	h2 Unowned games:
+	h2 Games that you don't own:
 	ul
 		each game in unowned
 			li= game.title+"-"

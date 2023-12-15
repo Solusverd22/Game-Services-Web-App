@@ -1,4 +1,5 @@
 module.exports = function (app, siteData) {
+	const steamAPIKey= "BF61E5EBFB67E838944874F1C29E5785";
 	const { check, validationResult } = require('express-validator');
 	const redirectLogin = (req, res, next) => {
 		if (!req.session.userId) {
@@ -127,7 +128,7 @@ module.exports = function (app, siteData) {
 	app.get('/gamesearch',redirectLogin,[check('keyword').isEmpty()], function (req, res) {
 		const errors = validationResult(req);
 		if (!errors.isEmpty()) {
-			res.redirect('/gamelist');
+			res.redirect('./gamelist');
 		}
 		else {
 			const comparison_id = req.sanitize(req.query.keyword);
@@ -164,7 +165,7 @@ module.exports = function (app, siteData) {
 	app.post('/gameadded', redirectLogin,[check('price').isFloat(),check('max_players').isInt()], function (req, res) {
 		const errors = validationResult(req);
 		if (!errors.isEmpty()) {
-			res.redirect('/addgame');
+			res.redirect('./addgame');
 		}
 		else {
 			const title = req.sanitize(req.body.title);
@@ -193,7 +194,7 @@ module.exports = function (app, siteData) {
 								if (err) {
 								return console.error(err.message);
 								}
-								res.redirect('/gamelist');
+								res.redirect('./gamelist');
 							});
 				})
 			})
@@ -203,7 +204,7 @@ module.exports = function (app, siteData) {
 	app.get('/registergame', redirectLogin,[check('keyword').isEmpty()], function (req, res) {
 		const errors = validationResult(req);
 		if (errors.isEmpty()) {
-			res.redirect('/gamelist');
+			res.redirect('./gamelist');
 		}
 		else {
 			const game_id = req.sanitize(req.query.keyword);
@@ -216,7 +217,7 @@ module.exports = function (app, siteData) {
 					if (err) {
 					return console.error(err.message);
 					}
-					res.redirect('/gamelist');
+					res.redirect('./gamelist');
 			});
 			})
 		}
@@ -224,7 +225,7 @@ module.exports = function (app, siteData) {
 	  app.get('/deregistergame', redirectLogin,[check('keyword').isEmpty()], function (req, res) {
 		const errors = validationResult(req);
 		if (errors.isEmpty()) {
-			res.redirect('/gamelist');
+			res.redirect('./gamelist');
 		}
 		else {
 			const game_id = req.sanitize(req.query.keyword);
@@ -237,12 +238,11 @@ module.exports = function (app, siteData) {
 					if (err) {
 					return console.error(err.message);
 					}
-					res.redirect('/gamelist');
+					res.redirect('./gamelist');
 			});
 			})
 		}
 	  });
-
 
 	  app.post('/filter', redirectLogin, function (req, res) {
 		if(req.body=={}) return res.redirect("/userlist");
@@ -258,14 +258,14 @@ module.exports = function (app, siteData) {
 		sqlquery = sqlquery.concat("GROUP BY games.id ");
 		sqlquery = sqlquery.concat("HAVING COUNT(DISTINCT users.id) = "+ids.length+";");
 		// execute sql query
-		console.log(sqlquery);
 		db.query(sqlquery, (err, result) => {
 			if (err) {
 				res.redirect('./');
 			}
-			console.log(result);
 			let newData = Object.assign({}, siteData, { list: result });
 			res.render('filteredgames.pug',newData);
 		})
+
+
 	});
 }
