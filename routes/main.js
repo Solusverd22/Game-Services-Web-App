@@ -20,7 +20,7 @@ module.exports = function (app, siteData) {
 			res.redirect('./register');
 		}
 		else {
-			const bcrypt = require('bcrypt');
+			const bcrypt = require('bcryptjs');
 			const saltRounds = 10;
 			const plainPassword = req.sanitize(req.body.password);
 			const username = req.sanitize(req.body.username);
@@ -52,7 +52,7 @@ module.exports = function (app, siteData) {
 		res.render('login.pug', newData);
 	});
 	app.post('/loggedin', function (req, res) {
-		const bcrypt = require('bcrypt');
+		const bcrypt = require('bcryptjs');
 		const saltRounds = 10;
 		const plainPassword = req.sanitize(req.body.password);
 		const username = req.sanitize(req.body.username);
@@ -150,7 +150,6 @@ module.exports = function (app, siteData) {
 				if (err) {
 					res.redirect('./');
 				}
-				console.log(result)
 				let newData = Object.assign({}, siteData, { list: result });
 				res.render('userlist.pug',newData);
 			})
@@ -176,7 +175,6 @@ module.exports = function (app, siteData) {
 				if (err) {
 					return console.error(err.message);
 				}
-				//res.redirect('/registergame?='+title);
 				//get user and game ids to update the merge table
 				db.query( "SELECT id FROM users WHERE username LIKE '"+req.session.userId+"';", (err, user_id_result) => {
 					if (err) {
@@ -206,9 +204,7 @@ module.exports = function (app, siteData) {
 			res.redirect('/gamelist');
 		}
 		else {
-			console.log(req.query.keyword);
 			const game_id = req.sanitize(req.query.keyword);
-			console.log("game_id: "+game_id);
 			db.query( "SELECT id FROM users WHERE username LIKE '"+req.session.userId+"';", (err, user_id_result) => {
 				if (err) {
 					console.error(err);
