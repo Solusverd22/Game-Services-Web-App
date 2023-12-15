@@ -100,7 +100,7 @@ module.exports = function (app, siteData) {
 	})
 
 	app.get('/gamelist', redirectLogin, (req,res) => {
-		let ownedQuery = "SELECT title FROM games ";
+		let ownedQuery = "SELECT title, games.id FROM games ";
 		ownedQuery = ownedQuery.concat("INNER JOIN game_profiles ON game_profiles.game_id=games.id ");
 		ownedQuery = ownedQuery.concat("INNER JOIN users ON users.id=game_profiles.user_id ");
 		ownedQuery = ownedQuery.concat("WHERE username LIKE '"+req.session.userId+"';");
@@ -109,10 +109,11 @@ module.exports = function (app, siteData) {
 			if (err) {
 				res.redirect('./');
 			}
-			let unownedQuery = "SELECT title, games.id FROM games ";
-			unownedQuery = unownedQuery.concat("LEFT JOIN game_profiles ON game_profiles.game_id=games.id ");
-			unownedQuery = unownedQuery.concat("LEFT JOIN users ON users.id=game_profiles.user_id ");
-			unownedQuery = unownedQuery.concat("WHERE username IS NULL;");
+			let unownedQuery = "SELECT games.title, games.id FROM games ";
+			unownedQuery = unownedQuery.concat("WHERE NOT EXISTS ( ");
+			unownedQuery = unownedQuery.concat("SELECT 1 FROM game_profiles ");
+			unownedQuery = unownedQuery.concat("INNER JOIN users ON game_profiles.user_id = users.id ");
+			unownedQuery = unownedQuery.concat("WHERE users.username = '"+req.session.userId+"' AND game_profiles.game_id = games.id );")
 			db.query(unownedQuery, (err, unownedresult) => {
 				if (err) {
 					res.redirect('./');
@@ -123,17 +124,6 @@ module.exports = function (app, siteData) {
 		})
 	})
 
-	app.get('/userlist',redirectLogin, (req,res) => {
-		let sqlquery = "SELECT * FROM users ";
-		// execute sql query
-		db.query(sqlquery, (err, result) => {
-			if (err) {
-				res.redirect('./');
-			}
-			let newData = Object.assign({}, siteData, { list: result });
-			res.render('userlist.pug',newData);
-		})
-	})
 	app.get('/gamesearch',redirectLogin,[check('keyword').isEmpty()], function (req, res) {
 		const errors = validationResult(req);
 		if (!errors.isEmpty()) {
@@ -154,6 +144,18 @@ module.exports = function (app, siteData) {
 				res.render('userlist.pug',newData);
 			})
 		}
+	})
+
+	app.get('/userlist',redirectLogin, (req,res) => {
+		let sqlquery = "SELECT * FROM users ";
+		// execute sql query
+		db.query(sqlquery, (err, result) => {
+			if (err) {
+				res.redirect('./');
+			}
+			let newData = Object.assign({}, siteData, { list: result });
+			res.render('userlist.pug',newData);
+		})
 	})
 
 	app.get('/addgame',redirectLogin, (req,res) => {
@@ -219,6 +221,28 @@ module.exports = function (app, siteData) {
 			})
 		}
 	  });
+	  app.get('/deregistergame', redirectLogin,[check('keyword').isEmpty()], function (req, res) {
+		const errors = validationResult(req);
+		if (errors.isEmpty()) {
+			res.redirect('/gamelist');
+		}
+		else {
+			const game_id = req.sanitize(req.query.keyword);
+			db.query( "SELECT id FROM users WHERE username LIKE '"+req.session.userId+"';", (err, user_id_result) => {
+				if (err) {
+					console.error(err);
+				}
+				let user_id = user_id_result[0].id;
+				db.query("DELETE FROM game_profiles WHERE user_id='"+user_id+"' AND game_id='+"+game_id+"';", (err, result) => {
+					if (err) {
+					return console.error(err.message);
+					}
+					res.redirect('/gamelist');
+			});
+			})
+		}
+	  });
+
 
 	  app.post('/filter', redirectLogin, function (req, res) {
 		if(req.body=={}) return res.redirect("/userlist");

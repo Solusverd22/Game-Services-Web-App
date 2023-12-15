@@ -4,6 +4,7 @@ block content
 	ul
 		each game in owned
 			li= game.title
+				a(href="/deregistergame?keyword="+game.id) I don't have this game
 	a(href='/addgame') add a new game
 	h2 Unowned games:
 	ul
