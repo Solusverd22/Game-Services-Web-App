@@ -202,13 +202,13 @@ module.exports = function (app, siteData) {
 	});
 	app.get('/registergame', redirectLogin,[check('keyword').isEmpty()], function (req, res) {
 		const errors = validationResult(req);
-		if (!errors.isEmpty()) {
+		if (errors.isEmpty()) {
 			res.redirect('/gamelist');
 		}
 		else {
 			console.log(req.query.keyword);
-			console.log(req.sanitize(req.query.keyword));
 			const game_id = req.sanitize(req.query.keyword);
+			console.log("game_id: "+game_id);
 			db.query( "SELECT id FROM users WHERE username LIKE '"+req.session.userId+"';", (err, user_id_result) => {
 				if (err) {
 					console.error(err);
