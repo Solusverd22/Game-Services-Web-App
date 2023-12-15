@@ -1,3 +1,3 @@
-::connects via ssh to igor and forwards the virtual server ssh port to localhost port 999 
+::connects to igor via ssh, in order to forward the virtual server ssh port to localhost port 9999 
 ::need to connect to igor to bypass college firewalls
-ssh -N -L 9999:myserver:2559 cgard008@doc.gold.ac.uk
+ssh -L 9999:myserver:2559 cgard008@doc.gold.ac.uk
