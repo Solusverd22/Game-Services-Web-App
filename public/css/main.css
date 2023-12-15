@@ -12,6 +12,7 @@ body{
 }
 #grid-item{
 	grid-column-start: 2;
+	z-index:1;
 }
 
 a{
@@ -27,7 +28,6 @@ input{
 	left: 5%;
 	bottom: 0;
 	width: 90%;
-	/* z-index:-1; */
 	text-align: left;
 }
 #right-align {

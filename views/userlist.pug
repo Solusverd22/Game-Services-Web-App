@@ -3,6 +3,6 @@ block content
 	h1 User List:
 	p click on a username to see which games you have in common
 	ul
-	each user in list
-		li
-			a(href='/gamesearch?= ') #{user.username}
+		each user in list
+			li= user.username+" - "
+				a(href='/gamesearch?='+user.id) games in common
