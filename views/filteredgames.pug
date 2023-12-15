@@ -1,0 +1,7 @@
+extends layout.pug
+block content
+	h1 Games that you share:
+	ul
+		each game in list
+			li= game.title
+	

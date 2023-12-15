@@ -19,7 +19,11 @@ a{
 	color: #ff6cdf;
 }
 input{
-	display: flex;
+	/* display: flex; */
+	font-size: xx-large; 
+	margin: 0.4rem;
+	min-height: 1rem;
+	min-width: 1rem;
 }
 #footer {
 	display: grid;

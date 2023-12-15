@@ -1,8 +1,9 @@
 extends layout.pug
 block content
 	h1 User List:
-	p click on a username to see which games you have in common
-	ul
+	p select some usernames to see which games they have in common
+	form(action="filter", method="post")
 		each user in list
-			li= user.username+" - "
-				a(href='/gamesearch?='+user.id) games in common
+			p #{user.username}
+				input(type="checkbox", name=user.id,id=user.id) 
+		input(type="submit", value="Filter")

@@ -219,4 +219,29 @@ module.exports = function (app, siteData) {
 			})
 		}
 	  });
+
+	  app.post('/filter', redirectLogin, function (req, res) {
+		if(req.body=={}) return res.redirect("/userlist");
+
+		let ids= Object.keys(req.body);
+		
+		let sqlquery = "SELECT games.* FROM games ";
+		sqlquery = sqlquery.concat("INNER JOIN game_profiles ON games.id = game_profiles.game_id ");
+		sqlquery = sqlquery.concat("INNER JOIN users ON game_profiles.user_id = users.id ");
+		sqlquery = sqlquery.concat("WHERE users.id IN ("+ids[0]);
+		for(let i=1;i<ids.length;i++) sqlquery = sqlquery.concat(", "+ids[i]);
+		sqlquery = sqlquery.concat(") ");
+		sqlquery = sqlquery.concat("GROUP BY games.id ");
+		sqlquery = sqlquery.concat("HAVING COUNT(DISTINCT users.id) = "+ids.length+";");
+		// execute sql query
+		console.log(sqlquery);
+		db.query(sqlquery, (err, result) => {
+			if (err) {
+				res.redirect('./');
+			}
+			console.log(result);
+			let newData = Object.assign({}, siteData, { list: result });
+			res.render('filteredgames.pug',newData);
+		})
+	});
 }
