@@ -1,6 +1,8 @@
 extends layout.pug
 block content
 	h1 User List:
+	p click on a username to see which games you have in common
 	ul
 	each user in list
-		li= user.username
+		li
+			a(href='/gamesearch?= ') #{user.username}

@@ -1,7 +1,7 @@
 extends layout.pug
 block content
-	h1 Games you Own:
+	h1 Games in our Database:
+	a(href='/addgame') add a new game
 	ul
 	each game in list
 		li= game.title
-			a(href='/gamesearch?= ') see games in common

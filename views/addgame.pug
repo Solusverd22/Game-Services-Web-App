@@ -1,0 +1,12 @@
+extends layout
+block content 
+	h1 Add New Game
+	form(method='POST', action='/gameadded')
+		p Title:
+			input(type='text', name='title',id="title")
+		p Max players:
+			input(type='number', name='max_players')
+		p Price:
+			input(type='text', name='price',id="price")
+		input(type='submit', value='Register')
+		

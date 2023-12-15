@@ -101,9 +101,9 @@ module.exports = function (app, siteData) {
 
 	app.get('/gamelist', redirectLogin, (req,res) => {
 		let sqlquery = "SELECT title FROM games ";
-		sqlquery.concat("INNER JOIN game_profiles ON game_profiles.game_id=games.id ");
-		sqlquery.concat("INNER JOIN users ON users.id=game_profiles.user_id ");
-		sqlquery.concat("WHERE username LIKE '"+req.session.userId+"';");
+		sqlquery = sqlquery.concat("INNER JOIN game_profiles ON game_profiles.game_id=games.id ");
+		sqlquery = sqlquery.concat("INNER JOIN users ON users.id=game_profiles.user_id ");
+		sqlquery = sqlquery.concat("WHERE username LIKE '"+req.session.userId+"';");
 		// execute sql query
 		db.query(sqlquery, (err, result) => {
 			if (err) {
@@ -114,19 +114,94 @@ module.exports = function (app, siteData) {
 		})
 	})
 
-	app.get('/userlist', (req,res) => {
+	app.get('/userlist',redirectLogin, (req,res) => {
 		let sqlquery = "SELECT * FROM users ";
-		sqlquery.concat("INNER JOIN game_profiles ON game_profiles.user_id=users.id ");
-		sqlquery.concat("INNER JOIN games ON games.id=game_profiles.game_id;");
+		sqlquery = sqlquery.concat("INNER JOIN game_profiles ON game_profiles.user_id=users.id ");
+		sqlquery = sqlquery.concat("INNER JOIN games ON games.id=game_profiles.game_id;");
 		// execute sql query
 		db.query(sqlquery, (err, result) => {
 			if (err) {
 				res.redirect('./');
 			}
-			console.log(result);
 			let newData = Object.assign({}, siteData, { list: result });
 			res.render('userlist.pug',newData);
 		})
 	})
 
+	app.get('/addgame',redirectLogin, (req,res) => {
+		res.render('addgame.pug',siteData);
+	})
+	app.post('/gameadded', redirectLogin,[check('price').isFloat(),check('max_players').isInt()], function (req, res) {
+		const errors = validationResult(req);
+		if (!errors.isEmpty()) {
+			res.redirect('/addgame');
+		}
+		else {
+			const title = req.sanitize(req.body.title);
+			const max_players = req.sanitize(req.body.max_players);
+			const price = req.sanitize(req.body.price);
+			// saving data in database
+			let sqlquery = "INSERT INTO games (title, price, max_players) VALUES (?,?,?)";
+			let newrecord = [title, price, max_players];
+			db.query(sqlquery, newrecord, (err, result) => {
+				if (err) {
+					return console.error(err.message);
+				}
+				//res.redirect('/registergame?='+title);
+				//get user and game ids to update the merge table
+				db.query( "SELECT id FROM users WHERE username LIKE '"+req.session.userId+"';", (err, user_id_result) => {
+					if (err) {
+						console.error(err);
+					}
+						let user_id =user_id_result[0].id;
+						db.query("SELECT id FROM games WHERE title LIKE '"+title+"';", (err, game_id_result) => {
+							if (err) {
+								console.error(err);
+							}
+							let game_id =game_id_result[0].id;
+							let newrecord2 = [user_id,game_id];
+							db.query("INSERT INTO game_profiles (user_id, game_id) VALUES (?,?)", newrecord2, (err, result) => {
+								if (err) {
+								return console.error(err.message);
+								}
+								res.redirect('/gamelist');
+							});
+				})
+			})
+		  	});
+		}
+	});
+	app.get('/registergame', redirectLogin,[check('keyword').isEmpty()], function (req, res) {
+		const errors = validationResult(req);
+		if (!errors.isEmpty()) {
+			res.redirect('/gamelist');
+		}
+		else {
+			const gametitle = req.sanitize(req.query.keyword);
+			console.log(gametitle);
+			//get user and game ids to update the merge table
+			db.query( "SELECT id FROM users WHERE username LIKE '"+req.session.userId+"';", (err, user_id_result) => {
+				if (err) {
+					console.error(err);
+				}
+				let user_id =user_id_result[0].id;
+				console.log(user_id_result);
+				console.log(user_id);
+				db.query("SELECT id FROM games WHERE title LIKE '"+gametitle+"';", (err, game_id_result) => {
+					if (err) {
+						console.error(err);
+					}
+					console.log(game_id_result);
+					let game_id =game_id_result[0].id;
+					let newrecord2 = [user_id,game_id];
+					db.query("INSERT INTO game_profiles (user_id, game_id) VALUES (?,?)", newrecord2, (err, result) => {
+						if (err) {
+						  return console.error(err.message);
+						}
+						res.redirect('/gamelist');
+					});
+				})
+			})
+		}
+	  });
 }
