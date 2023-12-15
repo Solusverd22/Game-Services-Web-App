@@ -39,7 +39,7 @@ module.exports = function (app, siteData) {
 						// Save user session here, when login is successful
 						req.session.userId = username;
 						result = 'Hello ' + username + ' you are now registered! We will send an email to you at ' + email;
-						result += 'Your password is: ' + plainPassword + ' and your hashed password is: ' + hashedPassword;
+						//result += ' Your password is: ' + plainPassword + ' and your hashed password is: ' + hashedPassword;
 						let newData = Object.assign({}, siteData, { text: result });
 						res.render('data2text.pug', newData);
 				});
@@ -110,7 +110,23 @@ module.exports = function (app, siteData) {
 				res.redirect('./');
 			}
 			let newData = Object.assign({}, siteData, { list: result });
-			res.render('gamelist',newData);
+			res.render('gamelist.pug',newData);
 		})
 	})
+
+	app.get('/userlist', (req,res) => {
+		let sqlquery = "SELECT * FROM users ";
+		sqlquery.concat("INNER JOIN game_profiles ON game_profiles.user_id=users.id ");
+		sqlquery.concat("INNER JOIN games ON games.id=game_profiles.game_id;");
+		// execute sql query
+		db.query(sqlquery, (err, result) => {
+			if (err) {
+				res.redirect('./');
+			}
+			console.log(result);
+			let newData = Object.assign({}, siteData, { list: result });
+			res.render('userlist.pug',newData);
+		})
+	})
+
 }
