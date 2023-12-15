@@ -100,24 +100,31 @@ module.exports = function (app, siteData) {
 	})
 
 	app.get('/gamelist', redirectLogin, (req,res) => {
-		let sqlquery = "SELECT title FROM games ";
-		sqlquery = sqlquery.concat("INNER JOIN game_profiles ON game_profiles.game_id=games.id ");
-		sqlquery = sqlquery.concat("INNER JOIN users ON users.id=game_profiles.user_id ");
-		sqlquery = sqlquery.concat("WHERE username LIKE '"+req.session.userId+"';");
+		let ownedQuery = "SELECT title FROM games ";
+		ownedQuery = ownedQuery.concat("INNER JOIN game_profiles ON game_profiles.game_id=games.id ");
+		ownedQuery = ownedQuery.concat("INNER JOIN users ON users.id=game_profiles.user_id ");
+		ownedQuery = ownedQuery.concat("WHERE username LIKE '"+req.session.userId+"';");
 		// execute sql query
-		db.query(sqlquery, (err, result) => {
+		db.query(ownedQuery, (err, ownedresult) => {
 			if (err) {
 				res.redirect('./');
 			}
-			let newData = Object.assign({}, siteData, { list: result });
-			res.render('gamelist.pug',newData);
+			let unownedQuery = "SELECT title, games.id FROM games ";
+			unownedQuery = unownedQuery.concat("LEFT JOIN game_profiles ON game_profiles.game_id=games.id ");
+			unownedQuery = unownedQuery.concat("LEFT JOIN users ON users.id=game_profiles.user_id ");
+			unownedQuery = unownedQuery.concat("WHERE username IS NULL;");
+			db.query(unownedQuery, (err, unownedresult) => {
+				if (err) {
+					res.redirect('./');
+				}
+				let newData = Object.assign({}, siteData, { owned: ownedresult,unowned: unownedresult });
+				res.render('gamelist.pug',newData);
+			})
 		})
 	})
 
 	app.get('/userlist',redirectLogin, (req,res) => {
 		let sqlquery = "SELECT * FROM users ";
-		sqlquery = sqlquery.concat("INNER JOIN game_profiles ON game_profiles.user_id=users.id ");
-		sqlquery = sqlquery.concat("INNER JOIN games ON games.id=game_profiles.game_id;");
 		// execute sql query
 		db.query(sqlquery, (err, result) => {
 			if (err) {
@@ -126,6 +133,28 @@ module.exports = function (app, siteData) {
 			let newData = Object.assign({}, siteData, { list: result });
 			res.render('userlist.pug',newData);
 		})
+	})
+	app.get('/gamesearch',redirectLogin,[check('keyword').isEmpty()], function (req, res) {
+		const errors = validationResult(req);
+		if (!errors.isEmpty()) {
+			res.redirect('/gamelist');
+		}
+		else {
+			const comparison_id = req.sanitize(req.query.keyword);
+			let sqlquery = "SELECT * FROM users ";
+			sqlquery = sqlquery.concat("INNER JOIN game_profiles ON game_profiles.user_id=users.id ");
+			sqlquery = sqlquery.concat("INNER JOIN games ON games.id=game_profiles.game_id ");
+			sqlquery = sqlquery.concat("WHERE user_id="+req.session.userId+" AND user_id="+comparison_id+";");
+			// execute sql query
+			db.query(sqlquery, (err, result) => {
+				if (err) {
+					res.redirect('./');
+				}
+				console.log(result)
+				let newData = Object.assign({}, siteData, { list: result });
+				res.render('userlist.pug',newData);
+			})
+		}
 	})
 
 	app.get('/addgame',redirectLogin, (req,res) => {
@@ -177,30 +206,20 @@ module.exports = function (app, siteData) {
 			res.redirect('/gamelist');
 		}
 		else {
-			const gametitle = req.sanitize(req.query.keyword);
-			console.log(gametitle);
-			//get user and game ids to update the merge table
+			console.log(req.query.keyword);
+			console.log(req.sanitize(req.query.keyword));
+			const game_id = req.sanitize(req.query.keyword);
 			db.query( "SELECT id FROM users WHERE username LIKE '"+req.session.userId+"';", (err, user_id_result) => {
 				if (err) {
 					console.error(err);
 				}
-				let user_id =user_id_result[0].id;
-				console.log(user_id_result);
-				console.log(user_id);
-				db.query("SELECT id FROM games WHERE title LIKE '"+gametitle+"';", (err, game_id_result) => {
+				let ids = [user_id_result[0].id,game_id]
+				db.query("INSERT INTO game_profiles (user_id, game_id) VALUES (?,?)", ids, (err, result) => {
 					if (err) {
-						console.error(err);
+					return console.error(err.message);
 					}
-					console.log(game_id_result);
-					let game_id =game_id_result[0].id;
-					let newrecord2 = [user_id,game_id];
-					db.query("INSERT INTO game_profiles (user_id, game_id) VALUES (?,?)", newrecord2, (err, result) => {
-						if (err) {
-						  return console.error(err.message);
-						}
-						res.redirect('/gamelist');
-					});
-				})
+					res.redirect('/gamelist');
+			});
 			})
 		}
 	  });
